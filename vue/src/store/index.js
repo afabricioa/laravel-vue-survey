@@ -4,17 +4,27 @@ export const useUserStore = defineStore('user', {
     state(){
         return {
             user: {
-                data: {
-                    name: 'Tom Cook',
-                    email: 'tom@example.com',
-                    imageUrl:
-                      'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-                  },
-                token: 'teste'
+                data: {},
+                token: null
             }
         }
     },
     actions: {
+        async register(registerUser){
+            return fetch(`http://127.0.0.1:8000/api/register`, {
+                mode: 'no-cors',
+                method: 'POST',
+                body: JSON.stringify(registerUser),
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                }
+            })
+            .then((res) => res.json())
+            .then((res) => {
+                console.log(res)
+            })
+        },
         logout(){
             this.$patch({
                 user: {
@@ -22,8 +32,6 @@ export const useUserStore = defineStore('user', {
                     token: null
                 }
             })
-
-            console.log(this.user.data)
         }
     },
 });
