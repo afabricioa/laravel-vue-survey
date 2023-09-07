@@ -1,26 +1,74 @@
 <script setup>
     import PageComponent from '../components/PageComponent.vue';
     import QuestionEditor from '../components/QuestionEditor.vue';
-    import {ref} from "vue";
-    import { useRoute } from 'vue-router';
+    import {ref, watch, computed} from "vue";
+    import { v4 as uuidv4 } from 'uuid';
+    import { useRoute, useRouter } from 'vue-router';
     import { useUserStore } from '../store/index';
 
     const route = useRoute();
+    const router = useRouter();
     const store = useUserStore();
+
+    let surveyLoading = computed(() => store.currentSurvey.loading);
 
     let model = ref({
         title: "",
         status: false,
         description: null,
-        imagem: null,
+        image: null,
         expire_date: null,
         questions: []
     });
 
-    if(route.params.id){
-        model.value = store.surveys.find((s) => s.id === parseInt(route.params.id));
+    watch(store.currentSurvey.data, () => {
+        model.value = {
+            ...JSON.parse(JSON.stringify(store.currentSurvey.data)),
+            status: store.currentSurvey.data.status !== "draft",
+            expire_date: store.currentSurvey.data.expire_date.split(" ")[0]
+        };
 
-        console.log(model.value)
+    });
+
+    if(route.params.id){
+        store.getSurvey(route.params.id);
+    }
+
+    function questionChange(data, index){
+        model.value.questions[index] = data;
+    }
+
+    function addQuestion(index){
+        let newQuestion = {
+            id: uuidv4(),
+            type: "text",
+            question: null,
+            description: null,
+            data: {}
+        }
+
+        model.value.questions.splice(index, 0, newQuestion);
+        //add a newQuestion at index without delete a value in array
+    }
+
+    function deleteQuestion(index){
+        model.value.questions.splice(index, 1);
+    }
+
+    function saveSurvey(){
+        store.saveSurvey(model.value).then(({data}) => {
+            router.push({
+                name: "Surveys"
+            })
+        })
+    }
+
+    function deleteSurvey(){
+        store.deleteSurvey(route.params.id).then(() => {
+            router.push({
+                name: 'Surveys'
+            })
+        })
     }
 </script>
 
@@ -31,51 +79,20 @@
                 <h1 class="text-3x1 font-bold text-gray-900">
                     {{ model.id ? model.title : "Create a Survey" }}
                 </h1>
+                <button
+                    v-if="route.params.id"
+                    type="button"
+                    class="py-2 px-3 text-white bg-red-500 rounded-md hover:bg-red-400"
+                    @click="deleteSurvey"
+                >
+                    Delete Survey
+                </button>
             </div>
         </template>
-        <pre>{{ model }}</pre>
-        <form @submit.prevent="saveSurvey">
+        <div v-if="surveyLoading" class="flex justify-center">Loading...</div>
+        <form v-else @submit.prevent="saveSurvey">
             <div class="shadow sm:rounded-md sm:overflow-hidden">
                 <div class="px-4 py-5 bg-white space-y-6 sm:p-6">
-                    <div>
-                        <label block text-sm font-medium text-gray-700>
-                            Imagem
-                        </label>
-                        <div class="mt-1 flex items-center">
-                            <img
-                                v-if="model.image"
-                                :src="model.image"
-                                :alt="model.title"
-                                class="w-64 h-48 object-cover`"
-                            />
-                            <span
-                                v-else
-                                class="flex items-center justify-center h-12 w-12 rounded-full overflow-hidden bg-gray-100"
-                            >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor"
-                                    class="w-6 h-6"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
-                                    />
-                                </svg>
-                            </span>
-                            <button
-                                type="button"
-                                class="relative overflow-hidden ml-5 bg-white py-2 px-3 border rounded-md border-gray-300 shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2"
-                            >
-                                <input type="file"
-                                    class="absolute left-0 top-0 right-0 bottom-0 opacity-0 cursor-pointer"
-                                />
-                                Change
-                            </button>
-                        </div>
-                    </div>
                     <!-- title -->
                     <div>
                         <label for="title" class="block text-sm font-medium text-gray-700">
