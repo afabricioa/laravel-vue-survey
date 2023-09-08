@@ -14,7 +14,9 @@
 
     const emit = defineEmits(["change", "addQuestion", "deleteQuestion"]);
 
-    const model = ref(JSON.parse(JSON.stringify(props.question)));
+    let model = ref({
+        ...JSON.parse(JSON.stringify(props.question))
+    });
 
     function shouldHaveOptions(){
         return ["select", "radio", "checkbox"].includes(model.value.type);

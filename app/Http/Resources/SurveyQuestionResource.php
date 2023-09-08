@@ -3,9 +3,8 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
-use App\Http\Resources\SurveyQuestionResource;
 
-class SurveyResource extends JsonResource
+class SurveyQuestionResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,14 +15,10 @@ class SurveyResource extends JsonResource
     public function toArray($request){
         return [
             'id' => $this->id,
-            'title' => $this->title,
-            'slug' => $this->slug,
-            'status' => $this->status !== 'draft',
+            'type' => $this->type,
+            'question' => $this->question,
             'description' => $this->description,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
-            'expire_date' => $this->expire_date,
-            'questions' => SurveyQuestionResource::collection($this->questions)
+            'data' => json_decode($this->data)
         ];
     }
 }

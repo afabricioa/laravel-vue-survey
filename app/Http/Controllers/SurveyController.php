@@ -43,7 +43,7 @@ class SurveyController extends Controller
         }
 
         //returns Survey base on toArray method from SurveyResource
-        return new SurveyResource($data);
+        return new SurveyResource($survey);
     }
 
     /**

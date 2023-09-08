@@ -27,7 +27,6 @@
             status: store.currentSurvey.data.status !== "draft",
             expire_date: store.currentSurvey.data.expire_date.split(" ")[0]
         };
-
     });
 
     if(route.params.id){
