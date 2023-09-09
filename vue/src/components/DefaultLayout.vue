@@ -3,7 +3,7 @@
     import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/vue/24/outline'
     import { RouterLink, RouterView, useRouter } from 'vue-router';
     import { useUserStore } from '../store/index';
-
+    import Notification from '../components/Notification.vue';
     const userStore = useUserStore();
 
     const { user, logout } = userStore;
@@ -92,6 +92,7 @@
       </Disclosure>
 
       <RouterView/>
+      <Notification/>
     </div>
   </template>
 

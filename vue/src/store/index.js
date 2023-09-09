@@ -16,7 +16,12 @@ export const useUserStore = defineStore('user', {
                 loading: false,
                 data: []
             },
-            questionTypes: ["text", "select", "radio", "checkbox", "textarea"]
+            questionTypes: ["text", "select", "radio", "checkbox", "textarea"],
+            notification: {
+                show: false,
+                message: null,
+                type: null
+            }
         }
     },
     actions: {
@@ -30,6 +35,7 @@ export const useUserStore = defineStore('user', {
                             }
                         })
                         sessionStorage.setItem('TOKEN', data.token);
+                        this.notify('User registered with success!', 'success');
                         return data;
                     })
         },
@@ -66,6 +72,7 @@ export const useUserStore = defineStore('user', {
                 console.log(survey.id)
                 response = axiosClient.put(`/survey/${survey.id}`, survey)
                 .then((res) => {
+                    this.notify('Survey Saved with success!', 'success');
                     return res.data;
                 })
 
@@ -77,7 +84,8 @@ export const useUserStore = defineStore('user', {
                         surveys: {
                             data: [...this.surveys.data, res.data]
                         }
-                    })
+                    });
+                    this.notify('Survey Saved with success!', 'success')
                     return res.data;
                 })
 
@@ -113,7 +121,8 @@ export const useUserStore = defineStore('user', {
         },
 
         async deleteSurvey(id){
-            return axiosClient.delete(`/survey/${id}`)
+            this.notify('Survey Deleted with success!', 'success');
+            return axiosClient.delete(`/survey/${id}`);
         },
 
         async getSurveys(){
@@ -130,6 +139,15 @@ export const useUserStore = defineStore('user', {
                     }
                 });
             })
+        },
+
+        notify(message, type){
+            this.notification.show = true;
+            this.notification.message = message;
+            this.notification.type = type;
+            setTimeout(() => {
+                this.notification.show = false;
+            }, 3000)
         }
     },
 });
